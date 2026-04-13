@@ -3,138 +3,242 @@
 {% block title %} Statistics {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-3">
-            <form method="GET">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <h3><u>Filters</u></h3>
-                            </div>
-                            <div class="col-md-4">
-                                <a href="{% url 'statistics_app:public' %}" class="btn btn-outline-info">
-                                    <i class="fa fa-times"></i>&nbsp;Clear
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div>From date: {{form.from_date}}</div>
-                        <div>To date: {{form.to_date}}</div>
-                        <div>Workshop: {{form.workshop_type}}</div>
-                        <div>State: {{form.state}}</div>
-                        <div>{{form.sort.help_text}}: {{form.sort}}</div>
-                        {% if request.user.is_authenticated %}
-                        <div>{{form.show_workshops.help_text}}: {{form.show_workshops}}</div>
-                        {% endif %}
-                        <br>
-                        <div class="row justify-content-center">
-                            <div class="col-md-4">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fa fa-eye"></i>&nbsp;View
-                                </button>
-                            </div>
-                            <div class="col-md-6">
-                                <button type="submit" class="btn btn-info" name="download" value="download">
-                                    <i class="fa fa-download"></i>&nbsp;Download
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
+<div class="container py-5 animate__animated animate__fadeIn">
+    <!-- Page Header -->
+    <div class="row mb-5 align-items-center">
+        <div class="col-md-6">
+            <h1 class="display-5" style="font-family: 'Google Sans', sans-serif; font-weight: 500; color: #202124;">Workshop Statistics</h1>
+            <p class="text-muted">A comprehensive overview of FOSSEE community impact across India</p>
         </div>
-        <div class="col">
-            <div class="row">
-                <div class="col-md-6">
-                    {% include "statistics_app/paginator.html" %}
+        <div class="col-md-6 text-end">
+            <div class="btn-group chart-btn-group">
+                <button class="btn hover-lift" id="state_graph">
+                    <span class="material-icons-round me-2">analytics</span> State Insights
+                </button>
+                <button class="btn hover-lift ms-2" id="type_graph">
+                    <span class="material-icons-round me-2">bar_chart</span> Topic Trends
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-md-3 stats-sidebar">
+            <div class="card shadow-sm border-0 animate__animated animate__fadeInLeft" style="border-radius: 12px; position: sticky; top: 100px;">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Refine Search</h3>
+                    <a href="{% url 'statistics_app:public' %}" class="btn btn-link btn-sm text-danger text-decoration-none d-flex align-items-center">
+                        <span class="material-icons-round font-size-18 me-1">restart_alt</span> Reset
+                    </a>
                 </div>
-                <div class="col-md-3">
-                    <button class="btn btn-info" id="state_graph">
-                        <i class="fa fa-bar-chart"></i>&nbsp;State chart
-                    </button>
-                </div>
-                <div class="col-md-3">
-                    <button class="btn btn-info" id="type_graph">
-                        <i class="fa fa-bar-chart"></i>&nbsp;Workshops chart
-                    </button>
+                <div class="card-body px-4 pb-4">
+                    <form method="GET" class="modern-form">
+                        <div class="mb-3">
+                            <label class="form-label">Duration From</label>
+                            <input type="date" name="from_date" value="{{request.GET.from_date}}" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">To Date</label>
+                            <input type="date" name="to_date" value="{{request.GET.to_date}}" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Workshop Topic</label>
+                            {{form.workshop_type}}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Geographic State</label>
+                            {{form.state}}
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Order By</label>
+                            {{form.sort}}
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary py-2 ripple-effect shadow-none d-flex align-items-center justify-content-center">
+                                <span class="material-icons-round me-2">search</span> Filter Results
+                            </button>
+                            <button type="submit" name="download" value="download" class="btn btn-outline-primary py-2 hover-lift d-flex align-items-center justify-content-center">
+                                <span class="material-icons-round me-2">cloud_download</span> Export CSV
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-            <table class="table table-responsive-sm">
-                <thead>
-                    <tr>
-                        <th>Sr No.</th>
-                        <th>Coordinator Name</th>
-                        <th>Institute Name</th>
-                        <th>Instructor Name</th>
-                        <th>Workshop Name</th>
-                        <th>Workshop Date</th>
-                    </tr>
-                </thead>
-                {% csrf_token %}
-                {% for workshop in objects %}
-                    <tbody>
-                        <tr>
-                            <td>{{ forloop.counter0|add:objects.start_index}}</td>
-                            <td>{{ workshop.coordinator.get_full_name | capfirst }}</td>
-                            <td>{{ workshop.coordinator.profile.institute | capfirst }}</td>
-                            <td>{{ workshop.instructor.get_full_name | capfirst }}</td>
-                            <td>{{ workshop.workshop_type.name }}</td>
-                            <td>{{ workshop.date | date}}</td>
-                        </tr>
-                    </tbody>
-                {% endfor %}
-            </table>
-            {% include "statistics_app/paginator.html" %}
+        </div>
+
+        <!-- Main Content (Table) -->
+        <div class="col-md-9 stats-main ps-md-4">
+            <!-- Paginator Top -->
+            <div class="d-flex justify-content-between align-items-center mb-4 ps-1">
+                <div class="text-muted small">Showing results for current filters</div>
+                {% include "statistics_app/paginator.html" %}
+            </div>
+
+            <!-- Table Container -->
+            <div class="stats-table-container shadow-sm border-0 animate__animated animate__fadeInUp" style="border-radius: 12px; background: white;">
+                <div class="table-responsive">
+                    <table class="table stats-table mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4 py-3">#</th>
+                                <th class="py-3">Coordinator</th>
+                                <th class="py-3">Institution</th>
+                                <th class="py-3">Expert/Instructor</th>
+                                <th class="py-3">Workshop Topic</th>
+                                <th class="pe-4 py-3">Scheduled Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for workshop in objects %}
+                            <tr class="hover-fade-row">
+                                <td class="ps-4 small text-muted font-monospace">{{ forloop.counter0|add:objects.start_index}}</td>
+                                <td>
+                                    <div class="fw-medium text-dark">{{ workshop.coordinator.get_full_name|title }}</div>
+                                </td>
+                                <td>
+                                    <div class="small text-muted text-wrap" style="max-width: 200px;">{{ workshop.coordinator.profile.institute|title }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill bg-light text-primary border px-3 py-2 fw-normal">
+                                        {{ workshop.instructor.get_full_name|title|default:"TBD" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-pill bg-primary me-2 shadow-sm" style="width: 8px; height: 8px;"></div>
+                                        <span class="fw-medium">{{ workshop.workshop_type.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <div class="text-muted small fw-medium">
+                                        <i class="material-icons-round align-middle me-1" style="font-size: 14px;">event</i>
+                                        {{ workshop.date|date:"d M Y" }}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="py-5 text-center">
+                                    <i class="material-icons-round text-muted mb-3" style="font-size: 48px;">search_off</i>
+                                    <h5 class="text-muted">No workshops found matched your filters.</h5>
+                                    <p class="text-muted small">Try adjusting your date range or topic choice.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Paginator Bottom -->
+            <div class="mt-4 pt-2 d-flex justify-content-end pb-5">
+                {% include "statistics_app/paginator.html" %}
+            </div>
         </div>
     </div>
 </div>
 
-<!-- The Modal -->
-<div id="dialog" title="Workshops Statistics">
-    <canvas id="myChart"></canvas>
+<!-- Modern Graph Modal -->
+<div id="dialog" title="Data Visualization" style="display: none;">
+    <div class="p-3">
+        <div class="alert alert-light border-0 small mb-4 bg-light shadow-none" style="border-radius: 8px;">
+            <i class="material-icons-round align-middle me-2 text-primary" style="font-size: 18px;">info</i>
+            Visualizing current filtered data. Insights are generated based on available database entries.
+        </div>
+        <div style="height: 350px;">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
 </div>
 
 <script type="text/javascript">
+    // Apply styling to django form elements
+    document.querySelectorAll('.modern-form select').forEach(select => {
+        select.classList.add('form-select');
+        select.style.borderRadius = '6px';
+        select.style.border = '1px solid #dadce0';
+        select.style.padding = '10px 14px';
+        select.style.fontSize = '14px';
+    });
+    
+    document.querySelectorAll('.modern-form input').forEach(input => {
+        if(input.type !== 'submit') {
+            input.classList.add('form-control');
+            input.style.borderRadius = '6px';
+            input.style.border = '1px solid #dadce0';
+            input.style.padding = '10px 14px';
+        }
+    });
+
+    // Chart logic
     var state_labels = {{ws_states|safe}};
     var state_data = {{ws_count|safe}};
     var type_labels = {{ws_type|safe}};
     var type_data = {{ws_type_count|safe}};
     var chart;
+    
     $("#state_graph").on("click", function() {
-        show_graph(state_labels, state_data, "State wise workshops");
+        show_graph(state_labels, state_data, "Workshops per State", "#4285f4");
     });
     $("#type_graph").on("click", function() {
-        show_graph(type_labels, type_data, "Type wise workshops");
+        show_graph(type_labels, type_data, "Popular Topics", "#34a853");
     });
 
-    function show_graph(labels, data, graph_name, chart_name) {
+    function show_graph(labels, data, graph_name, color) {
         var ctx = document.getElementById('myChart').getContext('2d');
         if(chart) chart.destroy();
         chart = new Chart(ctx, {
-            // The type of chart we want to create
             type: 'bar',
-
-            // The data for our dataset
             data: {
                 labels: labels,
                 datasets: [{
                     data: data,
                     label: graph_name,
-                    backgroundColor: 'rgb(255, 99, 132)',
-                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: color,
+                    borderColor: 'transparent',
+                    borderRadius: 6,
+                    barThickness: 30
                 }]
             },
-            // Configuration options go here
-            options: {}
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: { display: false },
+                scales: {
+                    yAxes: [{
+                        ticks: { beginAtZero: true, stepSize: 1, padding: 10 },
+                        gridLines: { color: '#f1f3f4', drawBorder: false }
+                    }],
+                    xAxes: [{
+                        gridLines: { display: false },
+                        ticks: { padding: 10 }
+                    }]
+                }
+            }
         });
+        
         $("#dialog").dialog({
-            width: 900,
-            height: 500
+            width: 750,
+            modal: true,
+            open: function(event, ui) {
+                $(".ui-dialog-titlebar").css({
+                    "background": "white",
+                    "border": "none",
+                    "border-bottom": "1px solid #f1f3f4",
+                    "font-family": "Google Sans, sans-serif",
+                    "font-weight": "500"
+                });
+                $(".ui-dialog").css({
+                    "border": "none",
+                    "border-radius": "12px",
+                    "box-shadow": "0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.2)"
+                });
+            }
         });
     }
 </script>
+{% endblock %}
 
 {% endblock %}

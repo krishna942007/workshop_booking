@@ -129,6 +129,98 @@ body {
     margin-bottom: 24px;
 }
 
+/* Statistics Page Enhancements */
+.stats-sidebar .card {
+    border: none;
+    box-shadow: 0 1px 3px rgba(60,64,67,0.3);
+    border-radius: 8px;
+}
+
+.stats-sidebar .card-header {
+    background: transparent;
+    border-bottom: 1px solid #f1f3f4;
+    padding: 20px;
+}
+
+.stats-sidebar h3 {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+    color: #202124;
+}
+
+.stats-sidebar .form-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #5f6368;
+    margin-top: 12px;
+    display: block;
+}
+
+.stats-sidebar select, .stats-sidebar input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.stats-main {
+    padding-left: 24px;
+}
+
+.stats-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    background: var(--surface);
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid #dadce0;
+}
+
+.chart-btn-group .btn {
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 8px 16px;
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+    background: #e8f0fe;
+    color: #1a73e8;
+    border: none;
+}
+
+.chart-btn-group .btn:hover {
+    background: #174ea6;
+    color: white;
+}
+
+.stats-table-container {
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid #dadce0;
+    overflow: hidden;
+}
+
+.stats-table {
+    margin-bottom: 0 !important;
+}
+
+.stats-table thead th {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dadce0;
+    font-weight: 500;
+    color: #5f6368;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .login-header {
     font-family: 'Google Sans', sans-serif;
     font-size: 24px;
