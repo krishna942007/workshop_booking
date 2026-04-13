@@ -77,25 +77,31 @@ def workshop_public_stats(request):
         )
         df = pd.DataFrame(list(data))
         if not df.empty:
-            df.status.replace(
-                [0, 1, 2], ['Pending', 'Success', 'Reject'], inplace=True
+            df['status'] = df['status'].replace(
+                [0, 1, 2], ['Pending', 'Success', 'Reject']
             )
             codes, states_map = list(zip(*states))
-            df.coordinator__profile__state.replace(
-                codes, states_map, inplace=True
+            df['coordinator__profile__state'] = df['coordinator__profile__state'].replace(
+                dict(zip(codes, states_map))
             )
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = f'attachment; filename=statistics.csv'
-            output_file = df.to_csv(response, index=False)
+            df.to_csv(response, index=False)
             return response
         else:
             messages.add_message(request, messages.WARNING, "No data found")
-    ws_states, ws_count = Workshop.objects.get_workshops_by_state(workshops)
-    ws_type, ws_type_count = Workshop.objects.get_workshops_by_type(workshops)
+    
+    # Ensure statistics calculation doesn't crash on empty/null data
+    try:
+        ws_states, ws_count = Workshop.objects.get_workshops_by_state(workshops)
+        ws_type, ws_type_count = Workshop.objects.get_workshops_by_type(workshops)
+    except Exception:
+        ws_states, ws_count, ws_type, ws_type_count = [], [], [], []
+
     paginator = Paginator(workshops, 30)
     page = request.GET.get('page')
-    workshops = paginator.get_page(page)
-    context = {"form": form, "objects": workshops, "ws_states": ws_states,
+    workshops_paginated = paginator.get_page(page)
+    context = {"form": form, "objects": workshops_paginated, "ws_states": ws_states,
                "ws_count": ws_count, "ws_type": ws_type,
                "ws_type_count": ws_type_count}
     return render(
