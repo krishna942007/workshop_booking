@@ -72,7 +72,21 @@ def index(request):
 
 # TODO: Forgot password workflow
 def user_login(request):
-    """User Login"""
+    """User Login form or API endpoint"""
+    # Check if this is a JSON API request
+    content_type = request.META.get('CONTENT_TYPE', '')
+    accept_header = request.META.get('HTTP_ACCEPT', '')
+    is_json_request = (
+        'application/json' in content_type or 
+        'application/json' in accept_header or
+        request.path.startswith('/api/')
+    )
+    
+    # If it's a JSON request, delegate to API handler
+    if is_json_request and request.method == 'POST':
+        return api_login(request)
+    
+    # Otherwise handle as template-based form
     user = request.user
     if user.is_superuser:
         return redirect('/admin')
@@ -260,7 +274,21 @@ def activate_user(request, key=None):
 
 
 def user_register(request):
-    """User Registration form"""
+    """User Registration form or API endpoint"""
+    # Check if this is a JSON API request
+    content_type = request.META.get('CONTENT_TYPE', '')
+    accept_header = request.META.get('HTTP_ACCEPT', '')
+    is_json_request = (
+        'application/json' in content_type or 
+        'application/json' in accept_header or
+        request.path.startswith('/api/')
+    )
+    
+    # If it's a JSON request, delegate to API handler
+    if is_json_request and request.method == 'POST':
+        return api_register(request)
+    
+    # Otherwise handle as template-based form
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
