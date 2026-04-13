@@ -162,24 +162,23 @@ class WorkshopManager(models.Manager):
     def get_workshops_by_state(self, workshops):
         w = workshops.values_list("coordinator__profile__state", flat=True)
         states_map = dict(states)
-        df = pd.DataFrame(list(w))
+        df = pd.DataFrame(list(w), columns=['state'] if w else [])
         data_states, data_counts = [], []
-        if not df.empty:
-            grouped_data = df.value_counts().to_dict()
-            for state, count in grouped_data.items():
-                state_name = state[0]
-                data_states.append(states_map[state_name])
+        if not df.empty and len(df.columns) > 0:
+            grouped_data = df['state'].value_counts()
+            for state_code, count in grouped_data.items():
+                state_name = states_map.get(state_code, state_code)
+                data_states.append(state_name)
                 data_counts.append(count)
         return data_states, data_counts
 
     def get_workshops_by_type(self, workshops):
         w = workshops.values_list("workshop_type__name", flat=True)
-        df = pd.DataFrame(list(w))
+        df = pd.DataFrame(list(w), columns=['type_name'] if w else [])
         data_wstypes, data_counts = [], []
-        if not df.empty:
-            grouped_data = df.value_counts().to_dict()
-            for ws, count in grouped_data.items():
-                ws_name = ws[0]
+        if not df.empty and len(df.columns) > 0:
+            grouped_data = df['type_name'].value_counts()
+            for ws_name, count in grouped_data.items():
                 data_wstypes.append(ws_name)
                 data_counts.append(count)
         return data_wstypes, data_counts
