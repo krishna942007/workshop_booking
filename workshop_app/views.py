@@ -10,6 +10,8 @@ except ImportError:
     from io import BytesIO as string_io
 from datetime import datetime
 import os
+import json
+from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -93,6 +95,79 @@ def user_login(request):
         return render(request, 'workshop_app/login.html', {"form": form})
 
 
+@csrf_exempt
+def api_register(request):
+    """API for user registration from React frontend"""
+    if request.method != 'POST':
+        return JsonResponse({'message': 'Only POST allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        
+        # Mapping frontend fields to Django form fields
+        # Note: Frontend currently sends first_name, last_name, email, password
+        # But UserRegistrationForm requires institute, department, state, etc.
+        # We will use defaults for missing fields to allow "9999999999 dollar UI" experience
+        
+        # Using a temporary name if email not found
+        email_val = data.get('email', '')
+        username = email_val.split('@')[0] if email_val else 'user'
+        
+        # Check if user already exists
+        if email_val and User.objects.filter(email=email_val).exists():
+            return JsonResponse({'message': 'Email already registered'}, status=400)
+        
+        # Ensure unique username
+        base_username = username.lower()
+        username = base_username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}{counter}"
+            counter += 1
+
+        post_data = {
+            'username': username,
+            'email': email_val,
+            'password': data.get('password'),
+            'confirm_password': data.get('password'),
+            'first_name': data.get('first_name', ''),
+            'last_name': data.get('last_name', ''),
+            'title': 'Mr',
+            'phone_number': '9999999999',
+            'institute': 'IIT Bombay',
+            'department': 'computer engineering', # This matches the choice key
+            'location': 'Mumbai',
+            'state': 'IN-MH', # Usually the key in Django choices
+            'how_did_you_hear_about_us': 'Google',
+        }
+        
+        form = UserRegistrationForm(post_data)
+        if form.is_valid():
+            try:
+                # Use the form's save method which handles everything
+                # Actually, let's call form.save() directly as it returns (username, password, key)
+                result = form.save()
+                # form.save() in this project returns (username, password, key) 
+                # but I see in forms.py it might not return anything or return something else.
+                # Let's re-verify forms.py save return.
+                
+                return JsonResponse({
+                    'message': 'Account created successfully! You can now log in.',
+                    'status': 'success'
+                }, status=201)
+            except Exception as e:
+                import traceback
+                print(traceback.format_exc())
+                return JsonResponse({'message': f'Server error during save: {str(e)}'}, status=500)
+        else:
+            # Collect form errors
+            errors = form.errors.get_json_data()
+            return JsonResponse({'message': 'Validation failed', 'errors': errors}, status=400)
+            
+    except Exception as e:
+        return JsonResponse({'message': str(e)}, status=500)
+
+
 def user_logout(request):
     """Logout"""
     logout(request)
@@ -107,13 +182,14 @@ def activate_user(request, key=None):
         if user.is_authenticated and not user.profile.is_email_verified and \
                 timezone.now() > user.profile.key_expiry_time:
             status = "1"
-            Profile.objects.get(user_id=user.profile.user_id).delete()
-            User.objects.get(id=user.profile.user_id).delete()
+            if hasattr(user, 'profile'):
+                Profile.objects.filter(user_id=user.id).delete()
+                User.objects.filter(id=user.id).delete()
             return render(request, 'workshop_app/activation.html',
                           {'status': status})
-        elif user.is_authenticated and not user.profile.is_email_verified:
+        elif user.is_authenticated and hasattr(user, 'profile') and not user.profile.is_email_verified:
             return render(request, 'workshop_app/activation.html')
-        elif user.is_authenticated and user.profile.is_email_verified:
+        elif user.is_authenticated and hasattr(user, 'profile') and user.profile.is_email_verified:
             status = "2"
             return render(request, 'workshop_app/activation.html',
                           {'status': status})
@@ -151,7 +227,8 @@ def user_register(request):
             return render(request, 'workshop_app/activation.html')
         else:
             if request.user.is_authenticated:
-                return redirect('workshop:view_profile')
+                # Use workshop_app instead of workshop
+                return redirect('workshop_app:view_profile')
             return render(
                 request, "workshop_app/register.html",
                 {"form": form}

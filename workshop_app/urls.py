@@ -21,6 +21,7 @@ app_name = "workshop_app"
 urlpatterns = [
     re_path(r'^$', views.index, name='index'),
     re_path(r'^register/$', views.user_register, name="register"),
+    re_path(r'^api/register/$', views.api_register, name="api_register"),
     re_path(r'^activate_user/(?P<key>.+)$', views.activate_user),
     re_path(r'^activate_user/$', views.activate_user),
     re_path(r'^login/$', views.user_login, name="login"),
