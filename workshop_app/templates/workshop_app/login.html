@@ -5,42 +5,54 @@
 {% endblock %}
 
 {% block content %}
-<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
-    <div class="card shadow-sm" style="width: 100%; max-width: 450px; border-radius: 12px; border: 1px solid #e0e0e0;">
+<div class="container d-flex align-items-center justify-content-center animate__animated animate__fadeIn" style="min-height: 80vh;">
+    <div class="card shadow-sm hover-lift" style="width: 100%; max-width: 450px; border-radius: 12px; border: 1px solid #e0e0e0;">
         <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <i class="material-icons-round text-primary animate__animated animate__bounceIn" style="font-size: 56px;">auto_awesome</i>
+            </div>
             <h1 class="login-header">Sign in</h1>
-            <p class="login-subheader">Use your FOSSEE Account</p>
+            <p class="login-subheader">Experience the future of FOSSEE</p>
             
-            <form method="post" novalidate>
+            <form id="loginForm" method="post" novalidate>
                 {% csrf_token %}
                 {% if form.non_field_errors %}
                     {% for error in form.non_field_errors %}
-                        <div class="alert alert-danger py-2 px-3 mb-4 rounded-3" style="font-size: 14px; background: #fce8e6; border: none; color: #c5221f;">
+                        <div class="alert alert-danger py-2 px-3 mb-4 rounded-3 animate__animated animate__shakeX" style="font-size: 14px; background: #fce8e6; border: none; color: #c5221f;">
                             <i class="fa fa-exclamation-circle me-2"></i> {{ error }}
                         </div>
                     {% endfor %}
                 {% endif %}
 
-                <div class="mb-4">
+                <div class="mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
                     <label for="id_username" class="form-label mb-1" style="font-size: 14px; font-weight: 500; color: #5f6368;">Email or Username</label>
-                    <input type="text" name="username" id="id_username" class="form-control py-2 px-3" 
+                    <input type="text" name="username" id="id_username" class="form-control py-2 px-3 transition-focus" 
                            placeholder="Enter your email" style="border-radius: 6px; border: 1px solid #dadce0;">
                 </div>
 
-                <div class="mb-5">
+                <div class="mb-5 animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <label for="id_password" class="form-label mb-0" style="font-size: 14px; font-weight: 500; color: #5f6368;">Password</label>
                     </div>
-                    <input type="password" name="password" id="id_password" class="form-control py-2 px-3" 
+                    <input type="password" name="password" id="id_password" class="form-control py-2 px-3 transition-focus" 
                            placeholder="Enter your password" style="border-radius: 6px; border: 1px solid #dadce0;">
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-5">
-                    <a href="{% url 'workshop_app:register' %}" class="text-decoration-none" style="font-size: 14px; font-weight: 500; color: #1a73e8;">Create account</a>
-                    <button type="submit" class="btn btn-primary px-4 py-2" style="background: #1a73e8; font-weight: 500; border-radius: 6px;">Next</button>
+                <div class="d-flex justify-content-between align-items-center mt-5 animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+                    <a href="{% url 'workshop_app:register' %}" class="text-decoration-none btn-link-hover" style="font-size: 14px; font-weight: 500; color: #1a73e8;">Create account</a>
+                    <button type="submit" class="btn btn-primary px-4 py-2 ripple-effect" style="background: #1a73e8; font-weight: 500; border-radius: 6px;">Next</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    // Custom loading interaction
+    document.getElementById('loginForm').onsubmit = function() {
+        const btn = this.querySelector('button[type="submit"]');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Verifying...';
+        btn.disabled = true;
+    };
+</script>
 {% endblock %}

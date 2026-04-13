@@ -204,3 +204,53 @@ body {
     min-height: calc(100vh - 120px);
 }
 
+/* Animations & Transitions */
+.fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hover-lift {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(60,64,67,0.1) !important;
+}
+
+/* Page Transitions */
+body {
+    opacity: 0;
+    animation: fadeInPage 0.4s ease-in forwards;
+}
+
+@keyframes fadeInPage {
+    to { opacity: 1; }
+}
+
+/* Micro-interactions */
+.btn {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
