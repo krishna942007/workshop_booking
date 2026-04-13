@@ -228,17 +228,16 @@
                         {% if form.email.errors %}{{ form.email.errors }}{% endif %}
                     </div>
                     <div class="form-group">
-                        <label for="{{ form.password1.id_for_label }}" class="required">Password</label>
-                        {{ form.password1 }}
-                        {% if form.password1.errors %}{{ form.password1.errors }}{% endif %}
+                        <label for="{{ form.password.id_for_label }}" class="required">Password</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}{{ form.password.errors }}{% endif %}
                     </div>
                 </div>
                 <div class="form-row full">
                     <div class="form-group">
-                        <label for="{{ form.password2.id_for_label }}" class="required">Confirm Password</label>
-                        {{ form.password2 }}
-                        {% if form.password2.errors %}{{ form.password2.errors }}{% endif %}
-                        {% if form.password2.help_text %}<small class="helptext">{{ form.password2.help_text|safe }}</small>{% endif %}
+                        <label for="{{ form.confirm_password.id_for_label }}" class="required">Confirm Password</label>
+                        {{ form.confirm_password }}
+                        {% if form.confirm_password.errors %}{{ form.confirm_password.errors }}{% endif %}
                     </div>
                 </div>
             </div>
@@ -267,9 +266,9 @@
                 </div>
                 <div class="form-row full">
                     <div class="form-group">
-                        <label for="{{ form.phone.id_for_label }}" class="required">Phone Number</label>
-                        {{ form.phone }}
-                        {% if form.phone.errors %}{{ form.phone.errors }}{% endif %}
+                        <label for="{{ form.phone_number.id_for_label }}" class="required">Phone Number</label>
+                        {{ form.phone_number }}
+                        {% if form.phone_number.errors %}{{ form.phone_number.errors }}{% endif %}
                     </div>
                 </div>
             </div>
@@ -312,9 +311,9 @@
                 <h4>Additional</h4>
                 <div class="form-row full">
                     <div class="form-group">
-                        <label for="{{ form.how_did_you_hear.id_for_label }}" class="required">How did you hear about us?</label>
-                        {{ form.how_did_you_hear }}
-                        {% if form.how_did_you_hear.errors %}{{ form.how_did_you_hear.errors }}{% endif %}
+                        <label for="{{ form.how_did_you_hear_about_us.id_for_label }}" class="required">How did you hear about us?</label>
+                        {{ form.how_did_you_hear_about_us }}
+                        {% if form.how_did_you_hear_about_us.errors %}{{ form.how_did_you_hear_about_us.errors }}{% endif %}
                     </div>
                 </div>
             </div>
