@@ -68,6 +68,67 @@ body {
     box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
 }
 
+/* Material Table Styles */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dadce0;
+    color: var(--google-grey);
+    font-family: 'Google Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody td {
+    padding: 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f3f4;
+    color: #3c4043;
+    font-size: 14px;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.badge-success {
+    background-color: var(--google-green);
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-family: 'Google Sans', sans-serif;
+    font-weight: 500;
+}
+
+.badge-warning {
+    background-color: var(--google-yellow);
+    color: #3c4043;
+    border-radius: 4px;
+    padding: 6px 12px;
+}
+
+.table-heading {
+    font-family: 'Google Sans', sans-serif;
+    color: #202124;
+    font-weight: 500;
+    margin-bottom: 24px;
+}
+
 .login-header {
     font-family: 'Google Sans', sans-serif;
     font-size: 24px;
