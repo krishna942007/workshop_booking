@@ -105,21 +105,17 @@ def api_register(request):
         data = json.loads(request.body)
         
         # Mapping frontend fields to Django form fields
-        # Note: Frontend currently sends first_name, last_name, email, password
-        # But UserRegistrationForm requires institute, department, state, etc.
-        # We will use defaults for missing fields to allow "9999999999 dollar UI" experience
-        
-        # Using a temporary name if email not found
-        email_val = data.get('email', '')
-        username = email_val.split('@')[0] if email_val else 'user'
+        email_val = data.get('email', '').strip()
+        if not email_val:
+            return JsonResponse({'message': 'Email is required'}, status=400)
         
         # Check if user already exists
-        if email_val and User.objects.filter(email=email_val).exists():
+        if User.objects.filter(email=email_val).exists():
             return JsonResponse({'message': 'Email already registered'}, status=400)
         
-        # Ensure unique username
-        base_username = username.lower()
-        username = base_username
+        # Generate unique username from email
+        username = email_val.split('@')[0].lower()
+        base_username = username
         counter = 1
         while User.objects.filter(username=username).exists():
             username = f"{base_username}{counter}"
@@ -128,44 +124,97 @@ def api_register(request):
         post_data = {
             'username': username,
             'email': email_val,
-            'password': data.get('password'),
-            'confirm_password': data.get('password'),
+            'password': data.get('password', ''),
+            'confirm_password': data.get('password', ''),
             'first_name': data.get('first_name', ''),
             'last_name': data.get('last_name', ''),
             'title': 'Mr',
             'phone_number': '9999999999',
             'institute': 'IIT Bombay',
-            'department': 'computer engineering', # This matches the choice key
+            'department': 'computer engineering',
             'location': 'Mumbai',
-            'state': 'IN-MH', # Usually the key in Django choices
+            'state': 'IN-MH',
             'how_did_you_hear_about_us': 'Google',
         }
         
         form = UserRegistrationForm(post_data)
         if form.is_valid():
             try:
-                # Use the form's save method which handles everything
-                # Actually, let's call form.save() directly as it returns (username, password, key)
+                # form.save() returns (username, password, activation_key)
                 result = form.save()
-                # form.save() in this project returns (username, password, key) 
-                # but I see in forms.py it might not return anything or return something else.
-                # Let's re-verify forms.py save return.
-                
                 return JsonResponse({
                     'message': 'Account created successfully! You can now log in.',
-                    'status': 'success'
+                    'status': 'success',
+                    'username': result[0] if result else username
                 }, status=201)
             except Exception as e:
                 import traceback
-                print(traceback.format_exc())
-                return JsonResponse({'message': f'Server error during save: {str(e)}'}, status=500)
+                traceback.print_exc()
+                return JsonResponse({'message': f'Error creating account: {str(e)}'}, status=500)
         else:
             # Collect form errors
-            errors = form.errors.get_json_data()
-            return JsonResponse({'message': 'Validation failed', 'errors': errors}, status=400)
+            error_msg = []
+            for field, errors in form.errors.items():
+                for error in errors:
+                    error_msg.append(f"{field}: {error}")
             
+            return JsonResponse({
+                'message': 'Validation failed',
+                'errors': error_msg
+            }, status=400)
+            
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'Invalid JSON'}, status=400)
     except Exception as e:
-        return JsonResponse({'message': str(e)}, status=500)
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'message': f'Server error: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+def api_login(request):
+    """API for user login from React frontend"""
+    if request.method != 'POST':
+        return JsonResponse({'message': 'Only POST allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        email = data.get('email', '').strip()
+        password = data.get('password', '')
+        
+        if not email or not password:
+            return JsonResponse({'message': 'Email and password required'}, status=400)
+        
+        # Find user by email
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return JsonResponse({'message': 'Invalid email or password'}, status=401)
+        
+        # Authenticate using username (since authenticate needs username)
+        authenticated_user = authenticate(username=user.username, password=password)
+        if authenticated_user is None:
+            return JsonResponse({'message': 'Invalid email or password'}, status=401)
+        
+        # Check if email is verified
+        if hasattr(authenticated_user, 'profile') and not authenticated_user.profile.is_email_verified:
+            return JsonResponse({'message': 'Please verify your email first'}, status=403)
+        
+        # Login the user
+        login(request, authenticated_user)
+        
+        return JsonResponse({
+            'message': 'Login successful',
+            'status': 'success',
+            'username': authenticated_user.username
+        }, status=200)
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'message': f'Server error: {str(e)}'}, status=500)
 
 
 def user_logout(request):
