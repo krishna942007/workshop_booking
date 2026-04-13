@@ -77,27 +77,44 @@ def workshop_public_stats(request):
         )
         df = pd.DataFrame(list(data))
         if not df.empty:
-            df.status.replace(
-                [0, 1, 2], ['Pending', 'Success', 'Reject'], inplace=True
-            )
-            codes, states_map = list(zip(*states))
-            df.coordinator__profile__state.replace(
-                codes, states_map, inplace=True
-            )
+            if 'status' in df.columns:
+                df['status'] = df['status'].replace(
+                    [0, 1, 2], ['Pending', 'Success', 'Reject']
+                )
+            
+            if 'coordinator__profile__state' in df.columns:
+                codes, states_map = list(zip(*states))
+                df['coordinator__profile__state'] = df['coordinator__profile__state'].replace(
+                    dict(zip(codes, states_map))
+                )
+            
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = f'attachment; filename=statistics.csv'
-            output_file = df.to_csv(response, index=False)
+            df.to_csv(response, index=False)
             return response
         else:
-            messages.add_message(request, messages.WARNING, "No data found")
-    ws_states, ws_count = Workshop.objects.get_workshops_by_state(workshops)
-    ws_type, ws_type_count = Workshop.objects.get_workshops_by_type(workshops)
+            messages.warning(request, "No data found to download.")
+            return redirect(reverse('statistics_app:public'))
+    
+    # Safely handle Chart data if Querysets are empty
+    try:
+        ws_states, ws_count = Workshop.objects.get_workshops_by_state(workshops)
+        ws_type, ws_type_count = Workshop.objects.get_workshops_by_type(workshops)
+    except Exception as e:
+        ws_states, ws_count, ws_type, ws_type_count = [], [], [], []
+
     paginator = Paginator(workshops, 30)
     page = request.GET.get('page')
-    workshops = paginator.get_page(page)
-    context = {"form": form, "objects": workshops, "ws_states": ws_states,
-               "ws_count": ws_count, "ws_type": ws_type,
-               "ws_type_count": ws_type_count}
+    workshops_page = paginator.get_page(page)
+    
+    context = {
+        "form": form, 
+        "objects": workshops_page, 
+        "ws_states": ws_states or [],
+        "ws_count": ws_count or [], 
+        "ws_type": ws_type or [],
+        "ws_type_count": ws_type_count or []
+    }
     return render(
         request, 'statistics_app/workshop_public_stats.html', context
     )
