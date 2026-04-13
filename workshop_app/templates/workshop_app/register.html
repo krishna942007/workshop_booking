@@ -1,35 +1,333 @@
 {% extends 'workshop_app/base.html' %}
 
-	{% block title %}
-		Register
-	{% endblock %}
+{% block title %}
+    Register
+{% endblock %}
 
 {% block content %}
-
-	<style type="text/css">
-    	label.required::after {
-    	content: "*";
-    	color: red;
-		}
-
-		.errorlist {
-      color: red;
+<style type="text/css">
+    .registration-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
     }
-	</style>
 
-	<div class="container" >
-		<br>
-		<h3>Coordinator Registration Form</h3>
-		<br>
-		<form action="" method="post">
-			{% csrf_token %}
-				<table class="table table-bordered">
-					{{ form.as_table }}
-				</table>
+    .registration-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        max-width: 600px;
+        width: 100%;
+        padding: 50px 40px;
+    }
 
-				<button class="btn btn-primary" type="submit">Register</button>
-		</form><br>
-		<!-- Activate when Instructor registeration starts -->
-		<br>
-	</div>
+    .registration-card h2 {
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 28px;
+        font-weight: 600;
+        color: #202124;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .registration-card .subtitle {
+        text-align: center;
+        color: #5f6368;
+        font-size: 14px;
+        margin-bottom: 30px;
+    }
+
+    .form-section {
+        margin-bottom: 24px;
+    }
+
+    .form-section h4 {
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: #202124;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e8eaed;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .form-row.full {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0;
+    }
+
+    .form-group label {
+        font-family: 'Roboto', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: #202124;
+        margin-bottom: 6px;
+    }
+
+    .form-group label.required::after {
+        content: "*";
+        color: #d33b27;
+        margin-left: 2px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+        padding: 10px 12px;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        transition: all 0.2s ease;
+        color: #202124;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        background-color: #fff;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-group input::placeholder {
+        color: #9aa0a6;
+    }
+
+    .form-group .helptext {
+        font-size: 12px;
+        color: #5f6368;
+        margin-top: 4px;
+        font-style: italic;
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 6px 0 0 0;
+    }
+
+    .errorlist li {
+        font-size: 12px;
+        color: #d33b27;
+        font-weight: 500;
+        padding: 4px 0;
+    }
+
+    .form-group .errorlist + input,
+    .form-group .errorlist + select {
+        border-color: #d33b27 !important;
+        background-color: rgba(211, 59, 39, 0.02) !important;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+        justify-content: center;
+    }
+
+    .btn-register {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 48px;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: 'Roboto', sans-serif;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-register:active {
+        transform: translateY(0);
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 14px;
+        color: #5f6368;
+    }
+
+    .login-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+        .registration-card {
+            padding: 30px 20px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .registration-card h2 {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<div class="registration-container">
+    <div class="registration-card">
+        <h2>Create Your Account</h2>
+        <p class="subtitle">Join our workshop community</p>
+
+        <form action="" method="post" class="registration-form">
+            {% csrf_token %}
+
+            <!-- Account Information -->
+            <div class="form-section">
+                <h4>Account Details</h4>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}" class="required">Username</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}{{ form.username.errors }}{% endif %}
+                        {% if form.username.help_text %}<small class="helptext">{{ form.username.help_text|safe }}</small>{% endif %}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}" class="required">Email Address</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}{{ form.email.errors }}{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.password1.id_for_label }}" class="required">Password</label>
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}{{ form.password1.errors }}{% endif %}
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="{{ form.password2.id_for_label }}" class="required">Confirm Password</label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}{{ form.password2.errors }}{% endif %}
+                        {% if form.password2.help_text %}<small class="helptext">{{ form.password2.help_text|safe }}</small>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="form-section">
+                <h4>Personal Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.first_name.id_for_label }}" class="required">First Name</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}{{ form.first_name.errors }}{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.last_name.id_for_label }}" class="required">Last Name</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}{{ form.last_name.errors }}{% endif %}
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="{{ form.title.id_for_label }}" class="required">Title</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}{{ form.title.errors }}{% endif %}
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="{{ form.phone.id_for_label }}" class="required">Phone Number</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}{{ form.phone.errors }}{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organization Information -->
+            <div class="form-section">
+                <h4>Organization</h4>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="{{ form.institute.id_for_label }}" class="required">Institute/Organization</label>
+                        {{ form.institute }}
+                        {% if form.institute.errors %}{{ form.institute.errors }}{% endif %}
+                        {% if form.institute.help_text %}<small class="helptext">{{ form.institute.help_text|safe }}</small>{% endif %}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.department.id_for_label }}" class="required">Department</label>
+                        {{ form.department }}
+                        {% if form.department.errors %}{{ form.department.errors }}{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.state.id_for_label }}" class="required">State</label>
+                        {{ form.state }}
+                        {% if form.state.errors %}{{ form.state.errors }}{% endif %}
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="{{ form.location.id_for_label }}" class="required">City/Location</label>
+                        {{ form.location }}
+                        {% if form.location.errors %}{{ form.location.errors }}{% endif %}
+                        {% if form.location.help_text %}<small class="helptext">{{ form.location.help_text|safe }}</small>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="form-section">
+                <h4>Additional</h4>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label for="{{ form.how_did_you_hear.id_for_label }}" class="required">How did you hear about us?</label>
+                        {{ form.how_did_you_hear }}
+                        {% if form.how_did_you_hear.errors %}{{ form.how_did_you_hear.errors }}{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn-register">Create Account</button>
+            </div>
+
+            <div class="login-link">
+                Already have an account? <a href="{% url 'workshop_app:login' %}">Sign In</a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
