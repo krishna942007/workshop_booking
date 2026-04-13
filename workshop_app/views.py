@@ -71,6 +71,7 @@ def index(request):
 # User views
 
 # TODO: Forgot password workflow
+@csrf_exempt
 def user_login(request):
     """User Login form or API endpoint"""
     # Check if this is a JSON API request
@@ -273,6 +274,7 @@ def activate_user(request, key=None):
                   {"status": status})
 
 
+@csrf_exempt
 def user_register(request):
     """User Registration form or API endpoint"""
     # Check if this is a JSON API request
